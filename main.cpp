@@ -469,7 +469,7 @@ void handleAddSong(LinkedList& li, bool addToBeginning) {
     } else if ((choice == "S" || choice == "s") && !musicFiles.empty()) {
       // Select multiple files
       std::cout << MenuUI::DOUBLE_TAB
-                << "Enter file numbers separated by slashes (e.g., 1,3,5): ";
+                << "Enter file numbers separated by commas (e.g., 1,3,5): ";
       std::string selections;
       getline(std::cin, selections);
 
@@ -478,7 +478,13 @@ void handleAddSong(LinkedList& li, bool addToBeginning) {
       std::string item;
 
       // Parse comma-separated list
-      while (std::getline(ss, item, '/')) {
+      while (std::getline(ss, item, ',')) {
+        // Trim whitespace from the item
+        item.erase(0, item.find_first_not_of(" \t"));
+        item.erase(item.find_last_not_of(" \t") + 1);
+
+        if (item.empty()) continue;  // Skip empty items
+
         try {
           int index = std::stoi(item);
           if (index >= 1 && index <= static_cast<int>(musicFiles.size())) {
