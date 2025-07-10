@@ -173,6 +173,24 @@ const string MenuUI::DOUBLE_TAB = "\t\t";
 
 // --- Utility Functions ---
 
+// Helper function to safely get playlist name for display
+std::string getSafePlaylistName(const std::string& name, int listIndex) {
+  if (name.empty()) {
+    return "[Unnamed List " + std::to_string(listIndex + 1) + "]";
+  }
+
+  // Check for null bytes or excessive length
+  if (name.find('\0') != std::string::npos) {
+    return "[Corrupted List " + std::to_string(listIndex + 1) + "]";
+  }
+
+  if (name.length() > 100) {
+    return name.substr(0, 97) + "...";
+  }
+
+  return name;
+}
+
 // Function to ensure the music directory exists, creating it if necessary
 void ensureMusicDirectoryExists() {
   const std::string musicDir = "music";
@@ -937,9 +955,7 @@ void manageListMenu(LinkedList& li, int listIndex) {
   bool backToMainMenu = false;
   while (!backToMainMenu) {
     string title =
-        "Manage List: " +
-        (li.listName.empty() ? "[Unnamed List " + to_string(listIndex + 1) + "]"
-                             : li.listName);
+        "Manage List: " + getSafePlaylistName(li.listName, listIndex);
     MenuUI::displayHeader(title);
     cout << MenuUI::DOUBLE_TAB << "Songs in list: " << li.len << endl << endl;
 
@@ -1142,9 +1158,7 @@ void manageCoordinatingMenu() {
   for (size_t i = 0; i < activeListIndices.size(); ++i) {
     int actualIndex = activeListIndices[i];
     cout << MenuUI::DOUBLE_TAB << (i + 1) << ". "
-         << (playlists[actualIndex].listName.empty()
-                 ? "[Unnamed List " + to_string(actualIndex + 1) + "]"
-                 : playlists[actualIndex].listName)
+         << getSafePlaylistName(playlists[actualIndex].listName, actualIndex)
          << " (" << playlists[actualIndex].len << " songs)" << endl;
   }
   cout << MenuUI::DOUBLE_TAB << "------------------------------------" << endl;
@@ -1261,9 +1275,7 @@ bool displayMainMenu() {
   for (size_t i = 0; i < playlists.size(); ++i) {
     cout << MenuUI::DOUBLE_TAB << "  Slot " << (i + 1) << ": ";
     if (playlists[i].taken) {
-      cout << "Active - '"
-           << (playlists[i].listName.empty() ? "[Unnamed]"
-                                             : playlists[i].listName)
+      cout << "Active - '" << getSafePlaylistName(playlists[i].listName, i)
            << "' (" << playlists[i].len << " songs)";
       activeCount++;
     } else {

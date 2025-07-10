@@ -2,7 +2,7 @@
 CXX = g++
 # Ensure C++17/C++23 standard is used for <filesystem>
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
-# Linker flags for audio libraries and JSON (filesystem usually doesn't need explicit linking with modern g++)
+# Linker flags for audio libraries (filesystem usually doesn't need explicit linking with modern g++)
 LDFLAGS = -lmpg123 -lpulse-simple -lpulse -lFLAC -lvorbisfile -lvorbis -logg -lsndfile
 
 # Source and Object Files
