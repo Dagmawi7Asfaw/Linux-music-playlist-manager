@@ -184,17 +184,25 @@ const string MenuUI::DOUBLE_TAB = "\t\t";
 
 // Helper function to safely get playlist name for display
 std::string getSafePlaylistName(const std::string& name, int listIndex) {
-  if (name.empty()) {
-    return "[Unnamed List " + std::to_string(listIndex + 1) + "]";
-  }
-
-  // Check for null bytes or excessive length
+  // Check for null bytes or empty string
   if (name.find('\0') != std::string::npos) {
     return "[Corrupted List " + std::to_string(listIndex + 1) + "]";
   }
 
-  if (name.length() > 100) {
-    return name.substr(0, 97) + "...";
+  if (name.empty()) {
+    return "[Unnamed List " + std::to_string(listIndex + 1) + "]";
+  }
+
+  // Check for excessive length
+  if (name.length() > 50) {
+    return name.substr(0, 47) + "...";
+  }
+
+  // Check for non-printable characters
+  for (char c : name) {
+    if (c < 32 || c > 126) {  // ASCII printable range
+      return "[Invalid Name " + std::to_string(listIndex + 1) + "]";
+    }
   }
 
   return name;
@@ -1351,18 +1359,26 @@ void printList(LinkedList& li) {
   node* temp = li.head;
   int songCount = 0;
 
-  MenuUI::displayHeader("Playlist: " + li.listName);
+  // Use safe playlist name
+  std::string safeListName = getSafePlaylistName(li.listName, 0);
+  MenuUI::displayHeader("Playlist: " + safeListName);
 
   std::cout << MenuUI::DOUBLE_TAB
             << "┌─ PLAYLIST CONTENTS ─────────────────────────────────────────┐"
             << std::endl;
 
   do {
-    // Get clean song name
+    // Get clean song name and ensure it's safe
     std::string songName = getCleanSongName(temp->song);
+    if (songName.find('\0') != std::string::npos) {
+      songName = "[Corrupted Song]";
+    }
 
-    // Get artist (already stored in the node)
+    // Get artist and ensure it's safe
     std::string artistName = temp->artist;
+    if (artistName.find('\0') != std::string::npos) {
+      artistName = "[Unknown]";
+    }
 
     // Format display string
     const int maxSongLength = 30;

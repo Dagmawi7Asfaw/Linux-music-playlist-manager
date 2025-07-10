@@ -238,9 +238,17 @@ void LinkedList::del_at(int pos) {
 // Displays the contents of the playlist
 // Shows playlist name and all songs with formatting
 void LinkedList::display() const {
-  std::cout << "\t\t\tPlaylist: " << (listName.empty() ? "[Unnamed]" : listName)
-            << std::endl;  // Show playlist name or [Unnamed]
+  // Safely display playlist name
+  std::string safeName = listName;
+  if (safeName.find('\0') != std::string::npos) {
+    safeName = "[Corrupted Name]";
+  } else if (safeName.empty()) {
+    safeName = "[Unnamed]";
+  }
+
+  std::cout << "\t\t\tPlaylist: " << safeName << std::endl;
   std::cout << "\t\t\t------------------------------------" << std::endl;
+
   if (head == nullptr) {
     std::cout << std::endl
               << "\t\t\t(List is empty)"
@@ -250,15 +258,25 @@ void LinkedList::display() const {
     int count = 1;      // Track position for display
     do {
       // Get clean name using helper from link.h
-      std::string cleanName =
-          getCleanSongName(temp->song);  // Extract filename from path
+      std::string cleanName = getCleanSongName(temp->song);
+
+      // Safely handle song name
+      if (cleanName.find('\0') != std::string::npos) {
+        cleanName = "[Corrupted Song]";
+      }
+
+      // Safely handle artist name
+      std::string safeArtist = temp->artist;
+      if (safeArtist.find('\0') != std::string::npos) {
+        safeArtist = "[Unknown]";
+      }
+
       // Use std::setw for formatting (requires <iomanip>)
       std::cout << "\t\t" << std::left << std::setw(3) << count++ << ". "
                 << std::setw(35)
                 << cleanName.substr(0, 35)  // Truncate song name if too long
                 << " -- "
-                << temp->artist.substr(0,
-                                       20)  // Truncate artist name if too long
+                << safeArtist.substr(0, 20)  // Truncate artist name if too long
                 << std::endl;
       temp = temp->next;  // Move to next node
     } while (temp != head);  // Loop until back to the start (circular list)
