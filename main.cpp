@@ -106,7 +106,16 @@ public:
     cout << "\t\t"
          << "┌──────────────────────────────────────────────────────────┐"
          << endl;
-    cout << "\t\t" << "│ " << left << setw(58) << title << " │" << endl;
+
+    // Safely handle the title to prevent corruption
+    string safeTitle = title;
+    if (safeTitle.find('\0') != string::npos) {
+      safeTitle = "[Corrupted Title]";
+    } else if (safeTitle.length() > 58) {
+      safeTitle = safeTitle.substr(0, 55) + "...";
+    }
+
+    cout << "\t\t" << "│ " << left << setw(58) << safeTitle << " │" << endl;
     cout << "\t\t"
          << "└──────────────────────────────────────────────────────────┘"
          << endl;
@@ -1322,6 +1331,14 @@ int main() {
   while (!shouldExitProgram) {
     shouldExitProgram = displayMainMenu();
   }
+
+  // Clean up before exit
+  for (auto& playlist : playlists) {
+    if (playlist.taken) {
+      playlist.clear();
+    }
+  }
+
   return 0;
 }
 

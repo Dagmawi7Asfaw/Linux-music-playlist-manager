@@ -271,6 +271,15 @@ void LinkedList::display() const {
 void LinkedList::clear() {
   if (head == nullptr) return;  // Nothing to clear if list is empty
 
+  // Safety check: ensure we have a valid circular list
+  if (head->next == nullptr) {
+    // Single node that's not properly circular
+    delete head;
+    head = nullptr;
+    len = 0;
+    return;
+  }
+
   node* current = head->next;  // Start from node after head
   head->next =
       nullptr;  // IMPORTANT: Break the circle FIRST to avoid infinite loop
