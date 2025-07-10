@@ -6,6 +6,7 @@ music_playlist
 
 # Generated playlist files
 *.txt
+*.json
 
 # Music directory (user's music files)
 music/
